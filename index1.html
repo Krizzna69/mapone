@@ -1,45 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geolocation with Attendance Marking</title>
+    <title>GeoCheckIn Dashboard</title>
     <style>
-        #map {
-            height: 60vh;
-            width: 100%;
+        body {
+            font-family: 'Poppins';
+            background-color: #f5f6fa;
+            margin: 0;
+            padding: 0;
             display: flex;
+            justify-content: center;
             align-items: center;
-            justify-content: space-around;
-        }
-        #buttonContainer {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 5;
-            display: flex;
-            flex-direction: column;
-        }
-        .action-button, #myActivityButton, #hideMapButton {
-            margin-bottom: 10px;
-            padding: 10px;
-            background-color: #6a11cb;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .action-button:hover, #myActivityButton:hover, #hideMapButton:hover {
-            background-color: #4a0dbd;
-        }
-        #footer {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            z-index: 5;
-            display: flex;
-            flex-direction: column;
+            height: 100vh;
         }
         #attendancePopup {
             position: absolute;
@@ -52,81 +29,175 @@
             border-radius: 5px;
             display: none;
         }
-        #loggedInAs {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            z-index: 5;
-            background-color: #6a11cb;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        /* Style for the table */
-        #attendanceTable {
-            display: none; /* Initially hidden */
+        .dashboard-container {
+            background-color: #ECDFCC;
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
         }
-        #attendanceTable th, #attendanceTable td {
-            border: 1px solid #ddd;
-            padding: 8px;
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .header img {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #333;
+            font-weight: 600;
+            font-family: 'Arial', sans-serif;
+        }
+        .profile-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #e0e0e0;
+            border-radius: 50%;
+            margin: 30px 0;
+        }
+        .icon-grid {
+            margin-top: 200px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        .icon-grid div {
+            width: 48%;
             text-align: center;
+            margin-bottom: 20px;
         }
-        #attendanceTable th {
-            background-color: #6a11cb;
-            color: white;
+        .icon-grid img {
+            width: 50px;
+            height: 50px;
+            display: block;
+            margin: 0 auto 10px;
+        }
+        .icon-grid span {
+            font-size: 16px;
+            color: #333;
+        }
+        .links-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+        .links-list li {
+            padding: 15px 0;
+            font-size: 16px;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border-top: 1px solid #e0e0e0;
+        }
+        .links-list li:first-child {
+            border-top: none;
+        }
+        .links-list li:hover {
+            background-color: #f9f9f9;
+        }
+        .links-list li span {
+            font-size: 16px;
+            color: #555;
+        }
+        #map{
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div id="map"></div>
-    <div id="buttonContainer">
-        <button id="offsiteWorkButton" onclick="setWorkMode('offsite')">Offsite Work</button>
-        <button id="onsiteWorkButton" onclick="setWorkMode('onsite')">Onsite Work</button>
-    </div>
-    <div id="footer">
-        <button class="action-button" onclick="punchIn()">Check In</button>
-        <button class="action-button" onclick="punchOut()">Check Out</button>
-        <button id="myActivityButton" onclick="toggleTable()">My Activity</button>
-        <button id="hideMapButton" onclick="toggleMap()">Hide Map</button>
-    </div>
     <div id="attendancePopup">
         Attendance Marked
     </div>
-    <div id="loggedInAs">
-        <span id="usernameDisplay">Logged in as: </span>
+    <div id="map"></div>
+    <div class="dashboard-container">
+        <div class="header">
+            <img src="Group 33.png" alt="Home" >
+            <h2>GeoCheckIn</h2>
+        </div>
+        <div class="icon-grid">
+            <div>
+                <img src="Map pin.png" alt="Live LOC" onclick="redirectToLiveLocation()" >
+                <span>Live LOC</span>
+            </div>
+            <div>
+                <img src="contact-form 1.png" alt="My Activity" onclick="redirectTomyactivity()">
+                <span>My Activity</span>
+            </div>
+            <div>
+                <img src="remote-assistance 1.png" alt="Off-site" onclick="redirectoffsite()">
+                <span>Off-site</span>
+            </div>
+            <div>
+                <img src="work-from-home 1.png" alt="WFH">
+                <span>WFH</span>
+            </div>
+        </div>
+        <ul class="links-list">
+            <li>
+                <span onclick="redirectpie()">Check Attendance Report</span>
+                <span>&#9658;</span>
+            </li>
+            <li>
+                <span onclick="redirectemp()">Employee Details</span>
+                <span>&#9658;</span>
+            </li>
+        </ul>
     </div>
-
-    <!-- Attendance Table -->
-    <table id="attendanceTable">
-        <thead>
-            <tr>
-                <th>First Check-In Time</th>
-                <th>Last Check-Out Time</th>
-                <th>Total Attendance</th>
-                <th>Total Working Hours</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Rows will be populated here -->
-        </tbody>
-    </table>
-
     <script>
-        let map, infoWindow, regionCircle, hasMarkedAttendance = false;
-        let username = ''; // Store the username after login
+        function redirectemp(){
+            window.location.href='employee.html'
+        }
+        function redirectpie(){
+            window.location.href='piechart.html';
+        }
+        function redirectoffsite(){
+            window.location.href='offsite.html';
+        }
+        function redirectToLiveLocation() {
+     window.location.href = 'livelocation.html';
+        }        
+        function redirectTomyactivity() {
+     window.location.href = 'Myactivity.html';
+        }
+        document.addEventListener("DOMContentLoaded", () => {
+            username = localStorage.getItem('username');
+            window.initMap = initMap;
+            
+        });
+
+        let map, infoWindow, regionCircle, hasPunchedInToday,hasMarkedAttendance = false;
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            username = localStorage.getItem('username');
+            
+        });
+         // Store the username after login
         const blueDotIcon = 'https://img.icons8.com/material-rounded/24/000000/marker.png'; // Replace with your blue dot URL
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
-                center: { lat: 16.662667, lng:80.737984 },
+                center: { lat: 16.662745, lng:80.737959, },
                 zoom: 15,
             });
             infoWindow = new google.maps.InfoWindow();
 
-            const regionCenter = { lat: 16.662782, lng: 80.738037 };
-
+            const regionCenter = { lat: 16.662745, lng:80.737959 };
             // Define a circular region with a 20-meter radius
             regionCircle = new google.maps.Circle({
                 strokeColor: "#FF0000",
@@ -136,7 +207,7 @@
                 fillOpacity: 0.35,
                 map,
                 center: regionCenter,
-                radius: 40,
+                radius: 50,
             });
 
             // Create a marker to represent the user's current location
@@ -162,40 +233,28 @@
                         map.setCenter(pos);
 
                         // Check if user is within the defined region
+                        let hasPunchedOut = false;
                         const distanceFromCenter = google.maps.geometry.spherical.computeDistanceBetween(
                             new google.maps.LatLng(pos.lat, pos.lng),
                             regionCircle.getCenter()
                         );
-
                         if (distanceFromCenter <= regionCircle.getRadius()) {
-                            if (!hasMarkedAttendance) {
-                                showAttendanceMarkedPopup();
-                                hasMarkedAttendance = true;
+        if (!hasMarkedAttendance) {
+        console.log('User is within region, marking attendance.');
+        showAttendanceMarkedPopup();
+        hasMarkedAttendance = true;
+        
+        punchIn(); // Punch in here
+    }
+} else {
+    if (hasMarkedAttendance && !hasPunchedOut) {
+        console.log('User is outside the region, punching out.');
+        punchOut();
+        hasPunchedOut = true;
+    }
+}
 
-                                // Send attendance update request to the server
-                                const response = await fetch('https://mapone.onrender.com/update-attendance', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({ username }), // Use the username from login
-                                });
-
-                                const data = await response.json();
-                                if (data.success) {
-                                    console.log('Attendance updated:', data.attendance);
-                                    punchIn();
-                                } else {
-                                    console.error('Attendance update failed:', data.message);
-                                }
-                            }
-                        } else {
-                            // Automatically punch out if the user leaves the geofenced area
-                            if (hasMarkedAttendance && !hasPunchedOut) {
-                                punchOut();
-                                hasPunchedOut = true;
-                            }
-                        }
+ 
                     },
                     () => {
                         handleLocationError(true, infoWindow, map.getCenter());
@@ -217,167 +276,88 @@
             );
             infoWindow.open(map);
         }
-        function setWorkMode(mode) {
-            const checkInButton = document.getElementById('checkInButton');
-            const checkOutButton = document.getElementById('checkOutButton');
-            
-            if (mode === 'offsite') {
-                checkInButton.style.display = 'none';
-                checkOutButton.style.display = 'none';
-                alert("You have selected Offsite Work. Check In/Out buttons are hidden.");
-            } else if (mode === 'onsite') {
-                checkInButton.style.display = 'block';
-                checkOutButton.style.display = 'block';
-                alert("You have selected Onsite Work. Check In/Out buttons are visible.");
-            }
-        }
+        
 
         function showAttendanceMarkedPopup() {
-            const popup = document.getElementById("attendancePopup");
-            popup.style.display = "block";
-            setTimeout(() => {
-                popup.style.display = "none";
-            }, 2000);
-        }
-
-        function punchIn() {
-            if (!username) {
-                alert('Error: No username provided.');
-                return;
-            }
-
-            const punchInTime = new Date().getTime();
-
-            fetch('https://mapone.onrender.com/punch-in', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, punchInTime }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Punched In at ' + new Date(punchInTime).toLocaleTimeString());
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                alert('An error occurred. Please try again.');
-            });
-        }
-
-        function punchOut() {
-            if (!username) {
-                alert('Error: No username provided.');
-                return;
-            }
-
-            const punchOutTime = new Date().getTime();
-
-            fetch('https://mapone.onrender.com/punch-out', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, punchOutTime }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Punched Out at ' + new Date(punchOutTime).toLocaleTimeString());
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                alert('An error occurred. Please try again.');
-            });
-        }
-
-        function toggleTable() {
-            const table = document.getElementById('attendanceTable');
-            if (table.style.display === 'none') {
-                fetchAttendance(); // Fetch data before displaying
-                table.style.display = 'table';
-                document.getElementById('map').style.display = 'none';
-                document.getElementById('hideMapButton').textContent = 'Show Map';
-            } else {
-                table.style.display = 'none';
-                document.getElementById('map').style.display = 'block';
-                document.getElementById('hideMapButton').textContent = 'Hide Map';
-            }
-        }
-
-        function toggleMap() {
-            const mapDiv = document.getElementById('map');
-            if (mapDiv.style.display === 'none') {
-                mapDiv.style.display = 'block';
-                document.getElementById('hideMapButton').textContent = 'Hide Map';
-            } else {
-                mapDiv.style.display = 'none';
-                document.getElementById('hideMapButton').textContent = 'Show Map';
-            }
-        }
-
-        async function fetchAttendance() {
-            if (!username) {
-                alert('No username found. Please log in.');
-                return;
-            }
-
-            try {
-                const response = await fetch(`https://mapone.onrender.com/get-attendance?username=${encodeURIComponent(username)}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    populateTable(data.attendance);
-                } else {
-                    alert(data.message);
-                }
-            } catch (error) {
-                console.error('Error fetching attendance data:', error);
-            }
-        }
-        function populateTable(attendance) {
-    const tableBody = document.getElementById('attendanceTable').getElementsByTagName('tbody')[0];
-    tableBody.innerHTML = ''; // Clear existing table rows
-
-    if (Array.isArray(attendance)) {
-        attendance.forEach(entry => {
-            const row = tableBody.insertRow();
-            row.insertCell().textContent = entry.firstCheckInTime;
-            row.insertCell().textContent = entry.lastCheckOutTime;
-            row.insertCell().textContent = entry.totalAttendance; // Corrected here
-            row.insertCell().textContent = entry.totalWorkingHours;
-        });
-    } else {
-        console.error('Attendance data is not an array:', attendance);
+    const popup = document.getElementById("attendancePopup");
+    if (popup) {
+        popup.style.display = "block";
+        setTimeout(() => {
+            popup.style.display = "none";
+        }, 3000);
     }
 }
 
-        window.initMap = initMap;
+        function punchIn() {
+        if (!username) {
+            alert('Error: No username provided.');
+            return;
+        }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            username = localStorage.getItem('username');
-            if (!username) {
-                window.location.href = 'login.html';
+        const currentDate = new Date().toDateString();
+
+        if (hasPunchedInToday && currentDate === localStorage.getItem('lastPunchInDate')) {
+            alert('You have already punched in for today.');
+            return;
+        }
+
+        const punchInTime = new Date().getTime();
+
+        fetch('https://geolocation-zmi9.onrender.com/punch-in', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, punchInTime }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Punched In at ' + new Date(punchInTime).toLocaleTimeString());
+                hasPunchedInToday = true;
+                localStorage.setItem('lastPunchInDate', currentDate);
             } else {
-                document.getElementById('usernameDisplay').textContent = `Logged in as: ${username}`;
+                alert('Error: ' + data.message);
             }
+        })
+        .catch(error => {
+            alert('An error occurred. Please try again.');
         });
-    </script>
+    }
 
+    function punchOut() {
+    if (!username) {
+        alert('Error: No username provided.');
+        return;
+    }
+
+    const punchOutTime = new Date().getTime();
+
+    fetch('https://geolocation-zmi9.onrender.com/punch-out', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, punchOutTime }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Punched Out at ' + new Date(punchOutTime).toLocaleTimeString());
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('An error occurred. Please try again.');
+    });
+}
+
+    initMap();
+    </script>
     <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyASAMgt4KkC1Hr4bbf8A8JBGwAcpwlAv6o&callback=initMap&v=weekly&libraries=geometry"
-        async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyASAMgt4KkC1Hr4bbf8A8JBGwAcpwlAv6o&callback=initMap&v=weekly&libraries=geometry"
+    async
     ></script>
 </body>
 </html>
